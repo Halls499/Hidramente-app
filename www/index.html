@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hidramente</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom right, #a2d5f2, #07689f);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 90%;
+    }
+
+    img {
+      width: 100px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: 2em;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+
+    input, button {
+      font-size: 1em;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      margin-top: 10px;
+    }
+
+    input {
+      width: 80%;
+      margin-bottom: 10px;
+    }
+
+    button {
+      background-color: #40a8c4;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2d8ca1;
+    }
+
+    .status {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #eaffd0;
+    }
+
+    #main-content {
+      display: none;
+    }
+
+    #total {
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="registro">
+      <img src="logo hidramente.png" alt="Hidramente Logo" id="img-hidratacao"/>
+      <h1>Bem-vindo!</h1>
+      <p>Digite seu nome para começar:</p>
+      <input type="text" id="nomeUsuario" placeholder="Seu nome..." />
+      <br />
+      <button onclick="registrarUsuario()">Registrar</button>
+    </div>
+
+    <div id="main-content">
+      <img src="logo hidramente.png" alt="Hidramente Logo" id="img-hidratacao"/>
+      <h1 id="titulo-boasvindas">Hora de se Hidratar!</h1>
+      <p>Não se esqueça de beber água regularmente para manter sua saúde em dia.</p>
+      <button onclick="marcarHidratado()">Já bebi água!</button>
+      <div class="status" id="status-text"></div>
+      
+      <p>Informe quantos ml de água você bebeu:</p>
+      <input type="number" id="quantidade" placeholder="Ex: 250" min="0">
+      <button onclick="adicionarAgua()">Adicionar</button>
+
+      <div id="total">Total consumido hoje: 0 ml</div>
+
+      <button onclick="ativarNotificacoes()">Ativar notificações</button>
+    </div>
+  </div>
+
+<script>
+  // Variáveis globais
+  let totalAgua = 0;
+  
+  // Função para ativar notificações (versão simplificada e funcional)
+  function ativarNotificacoes() {
+    // Verificação direta do plugin
+    if (window.cordova && cordova.plugins && cordova.plugins.notification && cordova.plugins.notification.local) {
+      // Notificação de teste (5 segundos)
+      cordova.plugins.notification.local.schedule({
+        id: 1,
+        title: 'Hidramente',
+        text: 'Hora de beber água! Mantenha-se hidratado.',
+        foreground: true,
+        trigger: { in: 5, unit: 'SECOND' } // Notificação em 5 segundos
+      });
+      
+      alert("Notificação agendada! Você receberá em 5 segundos.");
+      
+      // Notificação periódica (a cada 1 hora)
+      cordova.plugins.notification.local.schedule({
+        id: 2,
+        title: 'Hidramente',
+        text: 'Lembrete: está na hora de beber água novamente!',
+        foreground: true,
+        trigger: { every: 60, unit: 'MINUTE' } // A cada 1 hora
+      });
+    } else {
+      alert("Plugin de notificações não disponível.\n\nVerifique no Monaca:\n1. cordova-plugin-local-notification\n2. cordova-plugin-androidx-adapter");
+    }
+  }
+
+  function registrarUsuario() {
+    const nome = document.getElementById("nomeUsuario").value.trim();
+    if (navigator.vibrate) {
+      navigator.vibrate(200);
+    }
+    if (nome === "") {
+      alert("Por favor, insira seu nome.");
+      return;
+    }
+
+    document.getElementById("registro").style.display = "none";
+    document.getElementById("main-content").style.display = "block";
+    document.getElementById("titulo-boasvindas").innerText = `Olá, ${nome}! Hora de se Hidratar!`;
+  }
+
+  function marcarHidratado() {
+    if (navigator.vibrate) {
+      navigator.vibrate(200);
+    }
+    const statusText = document.getElementById("status-text");
+    const agora = new Date();
+    const hora = agora.getHours().toString().padStart(2, '0');
+    const minuto = agora.getMinutes().toString().padStart(2, '0');
+    statusText.innerText = `✅ Última hidratação registrada às ${hora}:${minuto}`;
+  }
+
+  function adicionarAgua() {
+    if (navigator.vibrate) {
+      navigator.vibrate(200);
+    }
+    const input = document.getElementById("quantidade");
+    const valor = parseInt(input.value);
+
+    if (!isNaN(valor) && valor > 0) {
+      totalAgua += valor;
+      document.getElementById("total").textContent = `Total consumido hoje: ${totalAgua} ml`;
+      input.value = "";
+    } else {
+      alert("Por favor, insira um valor válido em ml.");
+    }
+  }
+
+  // Inicialização simplificada
+  document.addEventListener('deviceready', function() {
+    console.log("Dispositivo pronto - Cordova carregado");
+    
+    // Solicita permissão para notificações (Android 13+)
+    if (window.cordova && cordova.plugins.notification.local) {
+      cordova.plugins.notification.local.requestPermission();
+    }
+  }, false);
+</script>
+
+</body>
+</html>
